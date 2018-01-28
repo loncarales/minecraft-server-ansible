@@ -1,0 +1,24 @@
+---
+
+- block:
+  - name: 'create a secondary, non-root user'
+    user:
+      name: '{{ remote_user_name }}'
+      shell: /bin/bash
+      createhome: yes 
+      comment: 'created with ansible'
+
+  - name: 'add remote authorized key to allow future passwordless logins'
+    authorized_key: 
+      user: '{{ remote_user_name }}' 
+      key: "{{ lookup('file', '~/.ssh/minecraft_id_rsa.pub') }}"
+
+  - name: 'add normal user to sudoers'
+    lineinfile:
+      path: /etc/sudoers
+      insertafter: EOF
+      regexp: '{{ remote_user_name }} ALL'
+      line: '{{ remote_user_name }} ALL=(ALL) NOPASSWD: ALL'
+      state: present
+
+  when: "'minecraft' in group_names"

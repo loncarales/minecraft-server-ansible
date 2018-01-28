@@ -1,0 +1,11 @@
+#!/usr/bin/env ansible-playbook
+--- 
+
+- name: 'molecule testing playbook'
+  hosts: all
+  become: yes
+  roles:
+    - remote-user
+    - server-setup
+    - minecraft-server
+    - mcmyadmin-setup

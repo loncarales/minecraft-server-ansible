@@ -1,0 +1,97 @@
+---
+
+
+- name: 'install required packages'
+  block:
+  - name: 'install packages via aptitude'
+    apt:
+      name: '{{ item }}'
+      state: present
+    with_items:
+      - openjdk-8-jre-headless
+      - screen
+      - unzip
+      - python-pip
+    tags: [ 'packages' ]
+
+  - name: 'install pip packages'
+    pip:
+      name: pexpect
+    tags: [ 'packages' ]
+
+- name: 'download mono and extract it'
+  unarchive:
+    src: http://mcmyadmin.com/Downloads/etc.zip
+    dest: /usr/local
+    remote_src: yes
+    creates: /usr/local/etc/mono
+
+- name: 'allow minecraft server traffic'
+  ufw:
+    rule: allow
+    proto: tcp
+    port: '{{ minecraft.server_port }}'
+
+- name: 'allow mcmyadmin server traffic'
+  ufw:
+    rule: allow 
+    proto: tcp
+    port: '{{ mcmyadmin.address_port }}'
+
+- name: 'download McMyAdmin control panel'
+  block:
+  - name: 'ensure McMyAdmin directory exists'
+    file:
+      path: '/home/{{ ansible_user }}/mcmyadmin'
+      state: directory
+    register: mcmyadmin_directory
+
+  - name: 'download McMyAdmin and extract it'
+    unarchive:
+      src: http://mcmyadmin.com/Downloads/MCMA2_glibc26_2.zip
+      dest: '{{ mcmyadmin_directory.path }}'
+      remote_src: yes
+      creates: '{{ mcmyadmin_directory.path }}/MCMA2_Linux_x86_64'
+  
+  - name: 'Start the initial configuration of McMyAdmin'
+    expect:
+      chdir: '{{ mcmyadmin_directory.path }}'
+      command: './MCMA2_Linux_x86_64 -setpass {{ mcmyadmin.admin_password }} -configonly'
+      echo: yes
+      responses:
+        'Continue\? \[y\/n\] :': 'y'
+
+  - name: 'copy eula.txt to minecraft-server folder'
+    copy:
+      src: eula.txt
+      dest: '{{ mcmyadmin_directory.path }}/Minecraft/eula.txt'
+      force: yes
+
+  - name: 'copy server.properties to minecraft-server folder'
+    template:
+      src: server.properties.j2
+      dest: '{{ mcmyadmin_directory.path }}/Minecraft/server.properties'
+
+  - name: 'change number of maximum players'
+    lineinfile:
+      path: '{{ mcmyadmin_directory.path }}/McMyAdmin.conf'
+      regexp: '^Limits\.MaxPlayers'
+      line: 'Limits.MaxPlayers={{ server_properties.max_players }}'
+      state: present
+
+  - name: 'change java memory'
+    lineinfile:
+      path: '{{ mcmyadmin_directory.path }}/McMyAdmin.conf'
+      regexp: '^Java\.Memory'
+      line: 'Java.Memory={{ java.memory_size }}'
+      state: present
+
+  - name: 'change java memory'
+    lineinfile:
+      path: '{{ mcmyadmin_directory.path }}/McMyAdmin.conf'
+      regexp: '^Game\.MOTD'
+      line: 'Game.MOTD={{ server_properties.motd }}'
+      state: present
+
+  become_user: '{{ ansible_user }}'
+  become: yes

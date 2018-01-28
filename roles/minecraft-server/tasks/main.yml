@@ -1,0 +1,50 @@
+---
+
+- name: 'install required packages'
+  apt:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - openjdk-8-jre-headless
+    - screen
+  tags: [ 'packages' ]
+
+- name: 'allow minecraft server traffic'
+  ufw:
+    rule: allow 
+    proto: tcp
+    port: '{{ minecraft.server_port }}'
+
+- name: 'download minecraft server version {{ minecraft.server_version }}'
+  block:
+  - name: 'ensure minecraft-server directory exists'
+    file:
+      path: '/home/{{ ansible_user }}/minecraft-server'
+      state: directory
+    register: minecraft_directory
+
+  - name: 'download jar file to minecraft-server folder'
+    get_url:
+      url: 'https://s3.amazonaws.com/Minecraft.Download/versions/{{ minecraft.server_version }}/minecraft_server.{{ minecraft.server_version }}.jar'
+      dest: '{{ minecraft_directory.path }}/minecraft-server.jar'
+      force: no
+  
+  - name: 'copy run-minecraft.sh to minecraft-server folder'
+    template:
+      src: run-minecraft.sh.j2
+      dest: '{{ minecraft_directory.path }}/run-minecraft.sh'
+      mode: 'u+rwx'
+
+  - name: 'copy eula.txt to minecraft-server folder'
+    copy:
+      src: eula.txt
+      dest: '{{ minecraft_directory.path }}/eula.txt'
+      force: yes
+
+  - name: 'copy server.properties to minecraft-server folder'
+    template:
+      src: server.properties.j2
+      dest: '{{ minecraft_directory.path }}/server.properties'
+
+  become_user: '{{ ansible_user }}'
+  become: yes

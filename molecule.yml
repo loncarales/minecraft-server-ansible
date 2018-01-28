@@ -1,0 +1,33 @@
+---
+ansible:
+  config_file: ansible.cfg
+  playbook: molecule_playbook.yml
+
+vagrant:
+  raw_config_args:
+    - "ssh.insert_key = false"
+    - "ssh.forward_agent = false"
+    - "vm.boot_timeout = 900"
+    - "vm.graceful_halt_timeout=100"
+
+  platforms:
+  - name: debianStretch
+    box: bento/debian-9.1
+    config.vm.box_url: https://app.vagrantup.com/bento/boxes/debian-9.1/versions/201708.22.0/provider/virtualbox.box
+
+  providers:
+  - name: virtualbox
+    type: virtualbox
+    options:
+      memory: 512
+      cpus: 1
+
+  instances:
+  - name: vagrant-minecraft
+    ansible_groups:
+      - vagrant
+    interfaces:
+      - network_name: private_network
+        type: static
+        ip: 192.168.15.6
+        auto_config: true

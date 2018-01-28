@@ -1,0 +1,13 @@
+---
+
+minecraft:
+  server_version: 1.12.2 
+  server_port: 25565
+
+java:
+  minimum_heap_size: 1024M
+  maximum_heap_size: 1536M
+
+server_properties:
+  max_players: 10
+  motd: 'Magmaland'

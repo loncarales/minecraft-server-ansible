@@ -1,0 +1,15 @@
+---
+
+minecraft:
+  server_port: 25565
+
+mcmyadmin:
+    admin_password: 'generate super strong password'
+    address_port: 8080
+
+server_properties:
+  max_players: 10
+  motd: 'Willkommen in Magmaland!'
+
+java:
+  memory_size: 1536

@@ -1,0 +1,9 @@
+---
+
+local_hostname: 'minecfraft-server'
+local_fqdn_name: 'minecraft.domain.com'
+
+common_ssh_port: 22
+common_mosh_from_port: 60000
+common_mosh_to_port: 60010
+common_logwatch_email: youremail@example.com

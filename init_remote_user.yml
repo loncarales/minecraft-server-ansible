@@ -1,0 +1,8 @@
+#!/usr/bin/env ansible-playbook
+--- 
+
+- name: 'initialize remote user'
+  hosts: all
+  become: yes
+  roles:
+    - remote-user
