@@ -2,7 +2,9 @@
 
 > Papa, kannst du uns einen Minecraft-Server machen?
 
-This is a repository of Ansible playbooks enabling me to create Minecraft Java Edition Server on Debian 9 (Stretch). 
+This is a repository of Ansible playbooks enabling me to create Minecraft Java Edition Server on Debian 9 (Stretch). The whole infrastructure is tested with Molecule and Vagrant.
+
+[Molecule](https://molecule.readthedocs.io/en/latest/) is an open source infrastructure testing tool written in Python that can provision and test Ansible roles. 
 
 It includes
 
